@@ -9,18 +9,18 @@ const validateTitle = (request, response, next) => {
     next()
 }
 
-const validateTask = (request, response, next) => {
+const validateStatus = (request, response, next) => {
     const { body } = request
 
-    if (body.title === undefined && body.status === undefined)
-        return response.status(400).json({message: 'The field is lacking information'})
+    if (body.status === undefined)
+        return response.status(400).json({message: 'The field status is required'})
     if (body.title === "" && body.status === "")
-        return response.status(400).json({message: 'The field was not filled properly'})
+        return response.status(400).json({message: 'The field has no status on it'})
 
     next()
 }
 
 module.exports = {
     validateTitle,
-    validateTask
+    validateStatus
 }
