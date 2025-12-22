@@ -81,3 +81,26 @@ Principais pacotes utilizados no projeto:
 - **jest** → Testes automatizados.
 
 **Dev:** eslint, @eslint/js, globals.
+
+## 🚀 Como rodar o projeto localmente
+
+Siga os passos abaixo para executar o projeto em ambiente local:
+
+```bash
+# 1️⃣ Clonar o repositório
+git clone https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git
+
+# 2️⃣ Acessar o diretório
+cd SEU_REPOSITORIO
+
+# 3️⃣ Instalar as dependências
+npm install
+
+# 4️⃣ Criar o arquivo .env (exemplo abaixo)
+DB_URI=mongodb://localhost:27017/seu_banco
+JWT_SECRET=sua_chave_secreta
+PORT=3000
+
+# 5️⃣ Rodar o servidor
+npm run dev
+```
