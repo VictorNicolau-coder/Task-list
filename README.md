@@ -88,10 +88,10 @@ Siga os passos abaixo para executar o projeto em ambiente local:
 
 ```bash
 # 1️⃣ Clonar o repositório
-git clone https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git
+git clone https://github.com/VictorNicolau-coder/APII.git
 
 # 2️⃣ Acessar o diretório
-cd SEU_REPOSITORIO
+cd APII
 
 # 3️⃣ Instalar as dependências
 npm install
