@@ -46,7 +46,7 @@ const createTask = async (request, response) => {
 
             await s3.send(new PutObjectCommand(uploadParams))
 
-            imageUrl = `https://${process.env.BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`
+            imageUrl = `https://${process.env.BUCKET_NAME}.s3.${process.env.BUCKET_REGION}.amazonaws.com/${fileName}`
         }
 
         // Cria a task com o link da imagem (se houver)
