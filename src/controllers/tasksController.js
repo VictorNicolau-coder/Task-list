@@ -37,6 +37,7 @@ const createTask = async (request, response) => {
             const file = request.file
             const fileName = `${Date.now()}-${file.originalname}`
 
+            console.log('Bucket recebido:', process.env.BUCKET_NAME);
             const uploadParams = {
                 Bucket: process.env.BUCKET_NAME,
                 Key: fileName,
