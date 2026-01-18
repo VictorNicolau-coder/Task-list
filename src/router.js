@@ -1,6 +1,7 @@
-const express = require('express')
 const tasksController = require('./controllers/tasksController')
 const tasksMiddleware = require('./middlewares/tasksMiddleware')
+
+const express = require('express')
 const multer = require('multer')
 
 const router = express.Router()
