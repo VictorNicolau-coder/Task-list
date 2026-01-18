@@ -44,6 +44,7 @@ router.delete(
 
 router.put(
     '/tasks/:id',
+    upload.single('image'),
     tasksMiddleware.authenticate, 
     tasksMiddleware.validateTitle, 
     tasksMiddleware.validateStatus,

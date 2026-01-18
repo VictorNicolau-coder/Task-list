@@ -75,11 +75,57 @@ const deleteTask = async (request, response) => {
 const updateTask = async (request, response) => {
     try {
         const { id } = request.params
-    
-        const updatedTask = await taskSchema.findByIdAndUpdate(id, request.body, { new: true })
-        return response.status(201).json(updatedTask)
+        const task = await taskSchema.findById(id)
+
+        if (!task) {
+            return response.status(404).json({ message: 'Task não encontrada' })
+        }
+
+        let imageUrl = task.imageUrl // mantém a imagem atual por padrão
+
+        // Se o usuário enviou uma nova imagem
+        if (request.file) {
+        const file = request.file
+        const fileName = `${Date.now()}-${file.originalname}`
+
+        //Se já existe uma imagem anterior, deletamos do S3
+        if (task.imageUrl) {
+            const oldKey = task.imageUrl.split('/').pop() // pega só o nome do arquivo
+            await s3.send(
+            new DeleteObjectCommand({
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: oldKey,
+            })
+            )
+        }
+
+        // Faz upload da nova imagem
+        const uploadParams = {
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: fileName,
+            Body: file.buffer,
+            ContentType: file.mimetype,
+        }
+
+        await s3.send(new PutObjectCommand(uploadParams))
+
+        imageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`
+        }
+
+        // Atualiza os campos da task
+        const updatedTask = await taskSchema.findByIdAndUpdate(
+        id,
+        {
+            ...request.body,
+            imageUrl,
+        },
+        { new: true }
+        )
+
+        return response.status(200).json(updatedTask)
     } catch (error) {
-        console.log(error)
+        console.error(error)
+        return response.status(500).json({ message: 'Erro ao atualizar task', error })
     }
 }
 
