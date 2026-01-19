@@ -62,7 +62,7 @@ Esse middleware realiza validações gerais (como controle de data, horário ou 
 ### 💡 Exemplo de requisição
 ```http
 GET /tasks HTTP/1.1
-Host: localhost:3000
+Host: apii-swart.vercel.app/logar
 Authorization: Bearer <token>
 ```
 
