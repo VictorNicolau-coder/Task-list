@@ -1,14 +1,43 @@
 const tasksController = require('../tasksController.js')
 const taskSchema = require('../../models/taskSchema')
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const PDFDocument = require("pdfkit")
 
 jest.mock('pdfkit')
 jest.mock('../../models/taskSchema')
+jest.mock('@aws-sdk/client-s3', () => {
+    const sendMock = jest.fn().mockResolvedValue({
+        ETag: '"mocked-etag"',
+        Location: 'https://fake-bucket.s3.amazonaws.com/fake-image.jpg',
+    });
+
+    return {
+        S3Client: jest.fn(() => ({
+        send: sendMock,
+        })),
+        PutObjectCommand: jest.fn((params) => params),
+        DeleteObjectCommand: jest.fn((params) => params),
+    };
+});
 
 describe("Tasks controller", ()=>{
+    let mockRequest, mockResponse, s3
+
     beforeEach(() => {
-        jest.clearAllMocks();
-    });
+        mockRequest = {
+            params: { id: '123' },
+            body: { title: 'Task atualizada', description: 'Nova descrição' },
+            file: null
+        }
+
+        mockResponse = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+        }
+
+        s3 = new S3Client()
+        jest.clearAllMocks()
+    })
 
     test("Should fetch all tasks from BD", async () => {
         const mockTasks = [
@@ -50,24 +79,23 @@ describe("Tasks controller", ()=>{
         expect(response.json).toHaveBeenCalledWith(mockTask);
     })
 
-    test("Should create a task and return the status 201", async () => {
-        const mockBody = {title: "Test 1", status: "pendente", created_at: Date.now}
-
-        const mockCreatedTask = {_id: "1", ...mockBody}
-        taskSchema.create.mockResolvedValue(mockCreatedTask)
-
-        const request = { body: mockBody }
-        const response = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn()
+    test('Should create a task with image upload', async () => {
+        mockRequest.file = {
+            originalname: 'foto.png',
+            buffer: Buffer.from('fake image'),
+            mimetype: 'image/png'
         }
-        
-        await tasksController.createTask(request, response)
 
-        expect(taskSchema.create).toHaveBeenCalledTimes(1);
-        expect(taskSchema.create).toHaveBeenCalledWith(mockBody)
-        expect(response.status).toHaveBeenCalledWith(201)
-        expect(response.json).toHaveBeenCalledWith(mockCreatedTask);
+        const fakeTask = { _id: '124', title: 'Com Imagem', description: 'Task com imagem', imageUrl: 'https://s3.amazonaws.com/foto.png' }
+        taskSchema.create.mockResolvedValue(fakeTask)
+        s3.send.mockResolvedValue({})
+
+        await tasksController.createTask(mockRequest, mockResponse)
+
+        expect(s3.send).toHaveBeenCalled()
+        expect(taskSchema.create).toHaveBeenCalled()
+        expect(mockResponse.status).toHaveBeenCalledWith(201)
+        expect(mockResponse.json).toHaveBeenCalledWith(fakeTask)
     })
 
     test("Should delete a task by id", async () => {
@@ -88,25 +116,28 @@ describe("Tasks controller", ()=>{
         expect(response.json).toHaveBeenCalledWith(mockDeletedTask);
     })
 
-    test('Should update a task and return it with status 201', async () => {
-        const mockBody = { title: 'Updated task' };
-        const mockUpdatedTask = { _id: '123', ...mockBody };
+    test('Should update a task with new content and image', async () => {
+        const oldTask = { _id: '123', imageUrl: 'https://bucket.s3.region.amazonaws.com/antiga.png' }
+        const updatedTask = { _id: '123', title: 'Nova', description: 'Com nova imagem', imageUrl: 'https://bucket.s3.region.amazonaws.com/nova.png' }
 
-        taskSchema.findByIdAndUpdate.mockResolvedValue(mockUpdatedTask);
+        mockRequest.file = {
+            originalname: 'nova.png',
+            buffer: Buffer.from('fake image'),
+            mimetype: 'image/png'
+        }
 
-        const request = { params: { id: '123' }, body: mockBody };
-        const response = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn()
-        };
+        taskSchema.findById.mockResolvedValue(oldTask)
+        s3.send.mockResolvedValueOnce({}) // delete antigo
+        s3.send.mockResolvedValueOnce({}) // upload novo
+        taskSchema.findByIdAndUpdate.mockResolvedValue(updatedTask)
 
-        await tasksController.updateTask(request, response);
+        await tasksController.updateTask(mockRequest, mockResponse)
 
-        expect(taskSchema.findByIdAndUpdate).toHaveBeenCalledTimes(1);
-        expect(taskSchema.findByIdAndUpdate).toHaveBeenCalledWith('123', mockBody, { new: true });
-
-        expect(response.status).toHaveBeenCalledWith(201);
-        expect(response.json).toHaveBeenCalledWith(mockUpdatedTask);
+        expect(s3.send).toHaveBeenCalledTimes(2)
+        expect(DeleteObjectCommand).toHaveBeenCalled()
+        expect(PutObjectCommand).toHaveBeenCalled()
+        expect(mockResponse.status).toHaveBeenCalledWith(200)
+        expect(mockResponse.json).toHaveBeenCalledWith(updatedTask)
     });
 
     test("Should return a PDF", async () => {

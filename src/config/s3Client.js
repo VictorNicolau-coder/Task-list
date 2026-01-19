@@ -10,5 +10,4 @@ const s3 = new S3Client({
     region: process.env.BUCKET_REGION
 })
 
-
 module.exports = s3
