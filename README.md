@@ -79,6 +79,8 @@ Principais pacotes utilizados no projeto:
 - **pdfkit** → Geração de PDFs.  
 - **nodemon** → Reinicia o servidor no modo dev.  
 - **jest** → Testes automatizados.
+- **multer** → Middleware reponsável por upload de arquivos.
+- **aws** → Conexão com serviços amazon.
 
 **Dev:** eslint, @eslint/js, globals.
 
