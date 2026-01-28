@@ -1,12 +1,16 @@
-# LISTA DE TAREFAS
+# 📝 Task List API
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/197eb19f-744e-4879-93b7-c5941e01372c" alt="Image">
+  <img src="https://github.com/user-attachments/assets/197eb19f-744e-4879-93b7-c5941e01372c" alt="Project Preview">
 </p>
 
-## 📁 Estrutura do Projeto
+A simple and efficient **Task Management API**, built with Node.js and Express, featuring user authentication, task CRUD operations, and PDF report generation.
 
-```bash 
+---
+
+## 📁 Project Structure
+
+```bash
 ├── eslint.config.mjs
 ├── jest.config.js
 ├── package.json
@@ -30,79 +34,99 @@
 └── vercel.json
 ```
 
-## 🧭 Rotas da API
+---
 
-Todas as rotas passam pelo middleware global **`validateDay`**, que é aplicado no `app.js` e executado antes de qualquer requisição.  
-Esse middleware realiza validações gerais (como controle de data, horário ou restrições de uso).
+## 🧭 API Routes
+
+All routes go through the global middleware **`validateDay`**, which runs before any request.
+This middleware performs general validations such as date/time control or access restrictions.
+
+### 📡 Available Endpoints
+
+| Method   | Route        | Middleware(s)                                                    | Description                                   |
+| :------- | :----------- | :--------------------------------------------------------------- | :-------------------------------------------- |
+| `POST`   | `/logar`     | `validateDay`                                                    | Logs in the user.                             |
+| `GET`    | `/tasks`     | `validateDay`, `authenticate`                                    | Returns all tasks for the authenticated user. |
+| `GET`    | `/task/:id`  | `validateDay`, `authenticate`                                    | Returns a specific task by its ID.            |
+| `POST`   | `/tasks`     | `validateDay`, `authenticate`, `validateTitle`                   | Creates a new task.                           |
+| `DELETE` | `/tasks/:id` | `validateDay`, `authenticate`                                    | Deletes a task by its ID.                     |
+| `PUT`    | `/tasks/:id` | `validateDay`, `authenticate`, `validateTitle`, `validateStatus` | Updates an existing task.                     |
+| `GET`    | `/pdf`       | `validateDay`, `authenticate`                                    | Generates a PDF report with all tasks.        |
 
 ---
 
-### 📡 Endpoints disponíveis
+### 🧩 Middlewares
 
-| Método | Rota           | Middleware(s)                                           | Descrição |
-|:-------|:----------------|:--------------------------------------------------------|:-----------|
-| `POST` | `/logar`        | `validateDay`                                          | Realiza o login do usuário. |
-| `GET`  | `/tasks`        | `validateDay`, `authenticate`                          | Retorna todas as tarefas do usuário. |
-| `GET`  | `/task/:id`     | `validateDay`, `authenticate`                          | Retorna uma tarefa específica pelo ID. |
-| `POST` | `/tasks`        | `validateDay`, `authenticate`, `validateTitle`         | Cria uma nova tarefa. |
-| `DELETE` | `/tasks/:id`  | `validateDay`, `authenticate`                          | Exclui uma tarefa pelo ID. |
-| `PUT`  | `/tasks/:id`    | `validateDay`, `authenticate`, `validateTitle`, `validateStatus` | Atualiza uma tarefa existente. |
-| `GET`  | `/pdf`          | `validateDay`, `authenticate`                          | Gera um PDF com as tarefas. |
+* **`validateDay`** → Global middleware executed before all routes.
+* **`authenticate`** → Ensures the user is authenticated before accessing a route.
+* **`validateTitle`** → Checks if the `title` field is provided and valid.
+* **`validateStatus`** → Verifies that the provided task status is allowed.
 
 ---
 
-### 🧩 Middlewares utilizados
-- **`validateDay`** → Middleware global que é executado antes de todas as rotas.  
-- **`authenticate`** → Garante que o usuário está autenticado antes de acessar a rota.  
-- **`validateTitle`** → Valida se o campo `title` está presente e é válido.  
-- **`validateStatus`** → Verifica se o status informado é permitido.
+### 💡 Example Request
 
----
-
-### 💡 Exemplo de requisição
 ```http
 GET /tasks HTTP/1.1
 Host: apii-swart.vercel.app/logar
 Authorization: Bearer <token>
 ```
 
-## 📦 Dependências
+---
 
-Principais pacotes utilizados no projeto:
+## 📦 Dependencies
 
-- **express** → Criação de rotas e servidor HTTP.  
-- **mongoose / mongodb** → Conexão e modelagem de dados no MongoDB.  
-- **mysql2** → Conexão com banco MySQL.  
-- **bcrypt** → Criptografia de senhas.  
-- **jsonwebtoken** → Autenticação via JWT.  
-- **dotenv** → Variáveis de ambiente.  
-- **pdfkit** → Geração de PDFs.  
-- **nodemon** → Reinicia o servidor no modo dev.  
-- **jest** → Testes automatizados.
-- **multer** → Middleware reponsável por upload de arquivos.
-- **aws** → Conexão com serviços amazon.
+Main packages used in the project:
 
-**Dev:** eslint, @eslint/js, globals.
+* **express** → Routing and HTTP server.
+* **mongoose / mongodb** → MongoDB connection and data modeling.
+* **mysql2** → MySQL database connection.
+* **bcrypt** → Password hashing.
+* **jsonwebtoken** → JWT authentication.
+* **dotenv** → Environment variable management.
+* **pdfkit** → PDF generation.
+* **nodemon** → Auto-reload for development.
+* **jest** → Unit testing.
+* **multer** → File upload handling.
+* **aws-sdk** → Integration with Amazon Web Services.
 
-## 🚀 Como rodar o projeto localmente
+**Dev dependencies:** eslint, @eslint/js, globals.
 
-Siga os passos abaixo para executar o projeto em ambiente local:
+---
+
+## 🚀 Running the Project Locally
+
+Follow these steps to set up the project on your local environment:
 
 ```bash
-# 1️⃣ Clonar o repositório
+# 1️⃣ Clone the repository
 git clone https://github.com/VictorNicolau-coder/APII.git
 
-# 2️⃣ Acessar o diretório
+# 2️⃣ Enter the project directory
 cd APII
 
-# 3️⃣ Instalar as dependências
+# 3️⃣ Install dependencies
 npm install
 
-# 4️⃣ Criar o arquivo .env (exemplo abaixo)
-DB_URI=mongodb://localhost:27017/seu_banco
-JWT_SECRET=sua_chave_secreta
+# 4️⃣ Create a .env file (example below)
+DB_URI=mongodb://localhost:27017/your_database
+JWT_SECRET=your_secret_key
 PORT=3000
 
-# 5️⃣ Rodar o servidor
+# 5️⃣ Run the server
 npm run dev
 ```
+
+---
+
+## 📜 License
+
+This project is licensed under the **MIT License** – feel free to use and modify it as you wish.
+
+---
+
+## ✨ Author
+
+**Victor Nicolau**
+👨‍💻 Computer Networks Technician | Information Systems Student
+🔗 [GitHub Profile](https://github.com/VictorNicolau-coder)
